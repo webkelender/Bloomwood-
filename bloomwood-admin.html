@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bloomwood Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F0E4; --panel:#FFFDF8; --line:#EFE6D3; --card:#F1E9DA;
+    --forest:#1F2E22; --forest2:#33402C; --sage:#4A5D45; --gold:#B98A4A; --gold2:#C9A876;
+    --ink:#2B2420; --muted:#9A8D74; --text:#3A342A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink);}
+  button,select,input{font-family:inherit; cursor:pointer;}
+  input,select{cursor:text;}
+  .serif{font-family:'Fraunces',serif;}
+  .mono{font-family:'Space Mono',monospace;}
+  .muted{color:var(--muted);}
+  table{width:100%; border-collapse:collapse;}
+  th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-family:'Space Mono',monospace; padding:12px 16px;}
+  td{padding:12px 16px; font-size:13.5px; color:var(--text); border-top:1px solid #F3EDE0;}
+  .panel{background:var(--panel); border-radius:14px; border:1px solid var(--line);}
+
+  /* layout */
+  .app{display:flex; min-height:100vh;}
+  .sidebar{width:256px; flex-shrink:0; background:var(--forest); position:fixed; top:0; left:0; height:100%; z-index:40; transform:translateX(-100%); transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);}
+  @media(min-width:900px){ .sidebar{position:static; transform:none;} .app{display:flex;} }
+  .sidebar-head{padding:24px; display:flex; align-items:center; justify-content:space-between;}
+  .sidebar-head .logo{font-family:'Fraunces',serif; font-size:20px; color:#FAF6EF;}
+  .sidebar-head .logo span{color:var(--gold2); font-size:12px; font-family:'Space Mono',monospace;}
+  .sidebar-close{display:block; color:#FAF6EF; font-size:18px; background:none;}
+  @media(min-width:900px){ .sidebar-close{display:none;} }
+  .navlist{display:flex; flex-direction:column; gap:4px; padding:8px 12px;}
+  .navitem{display:flex; align-items:center; gap:12px; padding:10px 12px; font-size:13px; border-radius:8px; color:#B9C2AE; text-align:left; width:100%;}
+  .navitem.active{background:var(--forest2); color:#FAF6EF;}
+  .side-user{margin:32px 16px 0; padding:16px; background:var(--forest2); border-radius:12px;}
+  .side-user p:first-child{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--gold2); font-family:'Space Mono',monospace;}
+  .side-user p:last-child{font-size:13px; color:#FAF6EF; margin-top:4px;}
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:30; display:none;}
+  .overlay.open{display:block;}
+
+  .main{flex:1; min-width:0;}
+  @media(min-width:900px){ .main{margin-left:0;} }
+  .topbar{position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:var(--panel); border-bottom:1px solid var(--line);}
+  @media(min-width:768px){ .topbar{padding:16px 32px;} }
+  .topbar h1{font-family:'Fraunces',serif; font-size:20px;}
+  .hamburger{display:block; font-size:18px; background:none;}
+  @media(min-width:900px){ .hamburger{display:none;} }
+  .search-box{display:none; align-items:center; gap:8px; padding:6px 12px; background:var(--card); border-radius:999px;}
+  @media(min-width:640px){ .search-box{display:flex;} }
+  .search-box input{background:none; border:none; outline:none; font-size:12.5px; width:120px;}
+  .role-select{font-size:12px; padding:6px 8px; background:var(--card); border:none; border-radius:6px;}
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--forest2); color:#FAF6EF; display:flex; align-items:center; justify-content:center; font-size:12px;}
+  .bell{position:relative;}
+  .bell .dot{position:absolute; top:-6px; right:-6px; width:14px; height:14px; background:var(--gold); color:#fff; border-radius:50%; font-size:8px; display:flex; align-items:center; justify-content:center;}
+
+  main{padding:20px;}
+  @media(min-width:768px){ main{padding:32px;} }
+
+  .grid{display:grid; gap:16px;}
+  .kpi-grid{grid-template-columns:1fr; }
+  @media(min-width:640px){ .kpi-grid{grid-template-columns:1fr 1fr;} }
+  @media(min-width:1024px){ .kpi-grid{grid-template-columns:repeat(4,1fr);} }
+  .kpi-card{padding:20px; background:var(--panel); border-radius:14px; border:1px solid var(--line);}
+  .kpi-card .label{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-family:'Space Mono',monospace;}
+  .kpi-card .value{font-family:'Fraunces',serif; font-size:26px; margin-top:8px;}
+  .kpi-card .delta{font-size:12px; margin-top:4px;}
+
+  .two-col{display:grid; gap:20px; grid-template-columns:1fr;}
+  @media(min-width:1024px){ .two-col{grid-template-columns:2fr 1fr;} }
+  .bars{display:flex; align-items:flex-end; gap:8px; height:128px;}
+  .bar{flex:1; border-radius:4px 4px 0 0; background:#DCE6D4;}
+  .bar.last{background:var(--gold);}
+
+  .badge{font-size:11px; padding:4px 10px; border-radius:999px; font-family:'Space Mono',monospace; display:inline-block;}
+  .b-good{background:#DCE6D4;color:#33402C;} .b-warn{background:#F3E2C4;color:#7A5A20;}
+  .b-bad{background:#F0D6D3;color:#8A3B32;} .b-info{background:#DCE3EC;color:#31445E;}
+  .b-neutral{background:var(--card);color:#5B5340;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:20px;}
+  .tab{padding:8px 16px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; border-radius:8px; font-family:'Space Mono',monospace; background:var(--card); color:var(--ink);}
+  .tab.active{background:var(--ink); color:#FAF6EF;}
+
+  .btn{padding:10px 16px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; border-radius:8px; font-family:'Space Mono',monospace; display:inline-flex; align-items:center; gap:6px;}
+  .btn-dark{background:var(--ink); color:#FAF6EF;}
+  .btn-outline{border:1px solid #D8CDB6; color:var(--ink);}
+  .toolbar{display:flex; justify-content:flex-end; margin-bottom:20px;}
+  .row-actions{display:flex; gap:12px;}
+  .row-actions button{font-size:13px;}
+
+  .cat-grid{display:grid; gap:16px; grid-template-columns:1fr 1fr;}
+  @media(min-width:768px){ .cat-grid{grid-template-columns:repeat(4,1fr);} }
+  .cat-card{padding:20px; background:var(--panel); border-radius:14px; border:1px solid var(--line);}
+
+  .stock-btn{width:28px; height:28px; border-radius:50%; background:var(--card);}
+
+  .stat-line{display:flex; justify-content:space-between; font-size:13px; padding:6px 0;}
+  .bar-row{display:flex; align-items:center; gap:12px; padding:6px 0;}
+  .bar-row .lbl{width:96px; font-size:12.5px;}
+  .bar-track{flex:1; height:8px; background:var(--card); border-radius:999px;}
+  .bar-fill{height:8px; background:var(--gold); border-radius:999px;}
+
+  .banner-card{overflow:hidden; background:var(--panel); border-radius:14px; border:1px solid var(--line);}
+  .banner-media{height:90px;}
+  .banner-body{padding:16px;}
+
+  .toggle{width:40px; height:22px; border-radius:999px; position:relative; background:#D8CDB6;}
+  .toggle.on{background:var(--sage);}
+  .toggle .knob{position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:left .15s;}
+  .toggle.on .knob{left:20px;}
+  .setting-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0;}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(31,26,20,.4); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px;}
+  .modal{width:100%; max-width:480px; max-height:85vh; overflow-y:auto; background:#FFFDF8; border-radius:16px; padding:24px;}
+  .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+  .modal-head h3{font-family:'Fraunces',serif; font-size:19px;}
+  .field-label{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-family:'Space Mono',monospace; display:block; margin-bottom:4px;}
+  .field{width:100%; padding:10px 12px; background:var(--card); border-radius:8px; border:none; outline:none; font-size:13.5px; margin-bottom:14px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="logo">Bloomwood <span>admin</span></span>
+      <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+    </div>
+    <nav class="navlist" id="navList"></nav>
+    <div class="side-user">
+      <p>Signed in as</p>
+      <p id="sideUserLabel">Store Admin</p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button class="hamburger" onclick="openSidebar()">☰</button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="search-box"><span>⌕</span><input placeholder="Search admin"/></div>
+        <button class="bell">🔔<span class="dot">3</span></button>
+        <select class="role-select" id="roleSelect" onchange="setRole(this.value)">
+          <option>Admin</option><option>Manager</option>
+        </select>
+        <div class="avatar">SA</div>
+      </div>
+    </header>
+    <main id="mainContent"></main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+/* ---------------------------------- DATA ---------------------------------- */
+const NAV = [
+  {key:"dashboard",label:"Dashboard",icon:"▦",roles:["Admin","Manager"]},
+  {key:"products",label:"Products & Categories",icon:"▢",roles:["Admin","Manager"]},
+  {key:"inventory",label:"Inventory",icon:"▣",roles:["Admin","Manager"]},
+  {key:"orders",label:"Orders & Customers",icon:"⛁",roles:["Admin","Manager"]},
+  {key:"coupons",label:"Coupons & Discounts",icon:"◈",roles:["Admin","Manager"]},
+  {key:"offers",label:"Offers & Promotions",icon:"✦",roles:["Admin","Manager"]},
+  {key:"content",label:"Blog & CMS",icon:"▤",roles:["Admin","Manager"]},
+  {key:"banners",label:"Banners & Homepage",icon:"▥",roles:["Admin","Manager"]},
+  {key:"analytics",label:"Sales Analytics",icon:"▨",roles:["Admin","Manager"]},
+  {key:"settings",label:"Store Settings",icon:"⚙",roles:["Admin"]},
+];
+const TITLES = {dashboard:"Dashboard",products:"Products & Categories",inventory:"Inventory",orders:"Orders & Customers",coupons:"Coupons & Discounts",offers:"Offers & Promotions",content:"Blog & CMS",banners:"Banners & Homepage",analytics:"Sales Analytics",settings:"Store Settings"};
+
+const CATS = [{id:1,name:"Skincare",count:5},{id:2,name:"Makeup",count:3},{id:3,name:"Haircare",count:2},{id:4,name:"Body",count:2}];
+
+let products = [
+  {id:1,name:"Bloomwater Cream Cleanser",cat:"Skincare",price:28,stock:142,status:"Active",sku:"BW-CLN-001"},
+  {id:2,name:"Verdant Clay Purifying Mask",cat:"Skincare",price:34,stock:8,status:"Active",sku:"BW-MSK-002"},
+  {id:3,name:"Golden Hour Vitamin C Serum",cat:"Skincare",price:46,stock:63,status:"Active",sku:"BW-SER-003"},
+  {id:4,name:"Hush Barrier Repair Balm",cat:"Skincare",price:32,stock:0,status:"Out of Stock",sku:"BW-BLM-004"},
+  {id:5,name:"Petal Silk Blush Duo",cat:"Makeup",price:24,stock:51,status:"Active",sku:"BW-BLS-005"},
+  {id:6,name:"Understated Tinted Balm",cat:"Makeup",price:22,stock:6,status:"Active",sku:"BW-LIP-006"},
+  {id:7,name:"Botanical Root Repair Oil",cat:"Haircare",price:38,stock:88,status:"Active",sku:"BW-OIL-007"},
+  {id:8,name:"Silt & Salt Volumising Spray",cat:"Haircare",price:26,stock:34,status:"Draft",sku:"BW-SPR-008"},
+  {id:9,name:"Fig Milk Body Polish",cat:"Body",price:30,stock:47,status:"Active",sku:"BW-BDY-009"},
+];
+let orders = [
+  {id:"BW4821",customer:"Meera Nair",email:"meera@mail.com",items:3,total:108,status:"Delivered",date:"2026-07-12",payment:"Paid"},
+  {id:"BW4822",customer:"Priya Shah",email:"priya@mail.com",items:1,total:28,status:"Shipped",date:"2026-07-13",payment:"Paid"},
+  {id:"BW4823",customer:"Aisha Khan",email:"aisha@mail.com",items:2,total:70,status:"Processing",date:"2026-07-14",payment:"Paid"},
+  {id:"BW4824",customer:"Ritu Desai",email:"ritu@mail.com",items:4,total:156,status:"Processing",date:"2026-07-15",payment:"Pending"},
+  {id:"BW4825",customer:"Sana Iyer",email:"sana@mail.com",items:1,total:46,status:"Cancelled",date:"2026-07-15",payment:"Refunded"},
+  {id:"BW4826",customer:"Neha Rao",email:"neha@mail.com",items:2,total:62,status:"Shipped",date:"2026-07-16",payment:"Paid"},
+];
+const customers = [
+  {id:1,name:"Meera Nair",email:"meera@mail.com",orders:6,spent:412,joined:"Jan 2025"},
+  {id:2,name:"Priya Shah",email:"priya@mail.com",orders:2,spent:88,joined:"Mar 2025"},
+  {id:3,name:"Aisha Khan",email:"aisha@mail.com",orders:9,spent:640,joined:"Nov 2024"},
+  {id:4,name:"Ritu Desai",email:"ritu@mail.com",orders:1,spent:156,joined:"Jul 2026"},
+];
+let coupons = [
+  {id:1,code:"BLOOM10",type:"Percentage",value:"10%",uses:214,status:"Active",expires:"2026-08-31"},
+  {id:2,code:"FREESHIP",type:"Free Shipping",value:"—",uses:89,status:"Active",expires:"2026-09-15"},
+  {id:3,code:"WELCOME15",type:"Percentage",value:"15%",uses:502,status:"Active",expires:"2026-12-31"},
+  {id:4,code:"SUMMER5",type:"Fixed",value:"$5",uses:340,status:"Expired",expires:"2026-06-30"},
+];
+let posts = [
+  {id:1,title:"The Case for a Slower Skincare Routine",status:"Published",author:"Bloomwood Editorial",date:"2026-06-02"},
+  {id:2,title:"Reading Your Skin Barrier Like a Map",status:"Published",author:"Dr. Anjali Rao",date:"2026-06-20"},
+  {id:3,title:"What 'Clean' Actually Means on Our Labels",status:"Draft",author:"Bloomwood Editorial",date:"2026-07-10"},
+];
+let banners = [
+  {id:1,name:"Autumn Ritual Hero",placement:"Homepage — Hero",status:"Live",tone:"sage"},
+  {id:2,name:"Vitamin C Serum Launch",placement:"Homepage — Strip",status:"Live",tone:"gold"},
+  {id:3,name:"Winter Sale Teaser",placement:"Category Page",status:"Scheduled",tone:"rose"},
+];
+const salesTrend = [32,41,38,52,49,61,58,70,66,78,74,88];
+let settings = {cod:true,card:true,upi:true,freeShipThreshold:true,taxInclusive:false,emailNotify:true,smsNotify:false};
+let offers = [
+  {id:1,productId:3,title:"Golden Hour Serum — Launch Week",offerPrice:36,startDate:"2026-07-14",endDate:"2026-07-28",status:"Active"},
+  {id:2,productId:2,title:"Clear the Shelf — Clay Mask",offerPrice:22,startDate:"2026-07-10",endDate:"2026-07-20",status:"Active"},
+  {id:3,productId:9,title:"Body Polish Weekend Deal",offerPrice:24,startDate:"2026-06-01",endDate:"2026-06-08",status:"Ended"},
+];
+
+const statusTone = {
+  Active:"good","In Stock":"good",Delivered:"good",Paid:"good",Live:"good",Published:"good",
+  Processing:"warn",Draft:"neutral",Pending:"warn",Scheduled:"warn",
+  "Out of Stock":"bad",Cancelled:"bad",Refunded:"bad",Expired:"bad",Shipped:"info",Ended:"neutral",
+};
+function badge(status){ return `<span class="badge b-${statusTone[status]||'neutral'}">${status}</span>`; }
+function fmt(n){ return "$"+Number(n).toFixed(2); }
+
+/* --------------------------------- STATE --------------------------------- */
+let state = { view:"dashboard", role:"Admin" };
+
+/* -------------------------------- SIDEBAR -------------------------------- */
+function renderNav(){
+  document.getElementById("navList").innerHTML = NAV.filter(n=>n.roles.includes(state.role)).map(n=>`
+    <button class="navitem ${state.view===n.key?'active':''}" onclick="setView('${n.key}')">
+      <span>${n.icon}</span> ${n.label}
+    </button>`).join("");
+  document.getElementById("sideUserLabel").textContent = state.role==="Admin" ? "Store Admin" : "Store Manager";
+  document.getElementById("roleSelect").value = state.role;
+}
+function openSidebar(){ document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("open"); }
+function closeSidebar(){ document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
+function setRole(r){
+  state.role = r;
+  if(!NAV.find(n=>n.key===state.view)?.roles.includes(r)) state.view = "dashboard";
+  render();
+}
+function setView(v){ state.view = v; closeSidebar(); render(); }
+function jumpToPriceEdit(productId){
+  state.view = "products";
+  productTab = "products";
+  editingPriceId = productId;
+  closeSidebar();
+  render();
+}
+
+/* -------------------------------- DASHBOARD -------------------------------- */
+function bars(data){
+  const max = Math.max(...data);
+  return `<div class="bars">${data.map((v,i)=>`<div class="bar ${i===data.length-1?'last':''}" style="height:${(v/max)*100}%" title="${v}"></div>`).join("")}</div>`;
+}
+function viewDashboard(){
+  const lowStock = products.filter(p=>p.stock>0 && p.stock<=10);
+  const outStock = products.filter(p=>p.stock===0);
+  const revenue = orders.reduce((s,o)=>s+o.total,0);
+  const alerts = [...outStock, ...lowStock].slice(0,5);
+  return `
+  <div class="grid kpi-grid">
+    <div class="kpi-card"><p class="label">Revenue (30d)</p><p class="value">${fmt(revenue)}</p><p class="delta" style="color:var(--sage)">↑ 12.4% vs last 30 days</p></div>
+    <div class="kpi-card"><p class="label">Orders</p><p class="value">${orders.length}</p><p class="delta" style="color:var(--sage)">↑ 6.1% vs last 30 days</p></div>
+    <div class="kpi-card"><p class="label">Customers</p><p class="value">${customers.length+218}</p><p class="delta" style="color:var(--sage)">↑ 3.2% vs last 30 days</p></div>
+    <div class="kpi-card"><p class="label">Avg. Order Value</p><p class="value">${fmt(revenue/orders.length)}</p><p class="delta" style="color:#8A3B32">↓ 1.8% vs last 30 days</p></div>
+  </div>
+  <div class="two-col" style="margin-top:20px;">
+    <div class="panel" style="padding:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 class="serif" style="font-size:17px;">Sales, last 12 weeks</h3>
+        <span class="badge b-good">+18% growth</span>
+      </div>
+      ${bars(salesTrend)}
+    </div>
+    <div class="panel" style="padding:20px;">
+      <h3 class="serif" style="font-size:17px;margin-bottom:16px;">⚠ Stock Alerts</h3>
+      ${alerts.map(p=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;"><button onclick="jumpToPriceEdit(${p.id})" style="text-decoration:underline;text-underline-offset:2px;">${p.name}</button>${badge(p.stock===0?"Out of Stock":"Low")}</div>`).join("")}
+    </div>
+  </div>
+  <div class="panel" style="padding:20px;margin-top:20px;">
+    <h3 class="serif" style="font-size:17px;margin-bottom:16px;">Recent Orders</h3>
+    <table>
+      <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${orders.slice(0,5).map(o=>`<tr><td>#${o.id}</td><td>${o.customer}</td><td>${fmt(o.total)}</td><td>${badge(o.status)}</td><td>${o.date}</td></tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+}
+
+/* -------------------------------- PRODUCTS -------------------------------- */
+let productTab = "products";
+let editingPriceId = null;
+function priceCell(p){
+  if(editingPriceId === p.id){
+    return `<td>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input id="inlinePrice_${p.id}" class="field" type="number" step="0.01" value="${p.price}" style="margin:0;width:80px;padding:6px 8px;" onkeydown="if(event.key==='Enter') saveInlinePrice(${p.id})"/>
+        <button onclick="saveInlinePrice(${p.id})" title="Save" style="font-size:13px;">✓</button>
+        <button onclick="editingPriceId=null; renderMain();" title="Cancel" style="font-size:13px;color:#8A3B32;">✕</button>
+      </div>
+    </td>`;
+  }
+  return `<td><button onclick="editingPriceId=${p.id}; renderMain();" style="text-decoration:underline dotted; text-underline-offset:3px;" title="Click to edit price">${fmt(p.price)}</button></td>`;
+}
+function saveInlinePrice(id){
+  const val = Number(document.getElementById("inlinePrice_"+id).value);
+  if(isNaN(val) || val < 0) return;
+  products = products.map(p=>p.id===id ? {...p, price: val} : p);
+  editingPriceId = null;
+  renderMain();
+}
+function viewProducts(){
+  const table = `
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+      <tbody>${products.map(p=>`
+        <tr>
+          <td>${p.name}</td><td>${p.sku}</td><td>${p.cat}</td>${priceCell(p)}<td>${p.stock}</td>
+          <td>${badge(p.status)}</td>
+          <td class="row-actions"><button onclick="openProductModal(${p.id})">✎</button><button onclick="deleteProduct(${p.id})" style="color:#8A3B32;">🗑</button></td>
+        </tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+  const cats = `
+  <div class="cat-grid">${CATS.map(c=>`<div class="cat-card"><p class="serif" style="font-size:17px;">${c.name}</p><p class="muted" style="font-size:12px;margin-top:4px;">${c.count} products</p></div>`).join("")}</div>`;
+  return `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div class="tabs">
+      <button class="tab ${productTab==='products'?'active':''}" onclick="setProductTab('products')">Products</button>
+      <button class="tab ${productTab==='categories'?'active':''}" onclick="setProductTab('categories')">Categories</button>
+    </div>
+    ${productTab==='products' ? `<button class="btn btn-dark" onclick="openProductModal()">+ Add Product</button>` : ""}
+  </div>
+  ${productTab==='products' ? table : cats}`;
+}
+function setProductTab(t){ productTab=t; renderMain(); }
+function deleteProduct(id){ products = products.filter(p=>p.id!==id); renderMain(); }
+function openProductModal(id){
+  const p = id ? products.find(x=>x.id===id) : {name:"",sku:"",cat:"Skincare",price:"",stock:""};
+  const isEdit = !!id;
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h3>${isEdit?'Edit Product':'Add Product'}</h3><button onclick="closeModal()">✕</button></div>
+      <form onsubmit="return saveProduct(event, ${isEdit ? id : 'null'})">
+        <label class="field-label">Product name</label><input class="field" id="f_name" value="${p.name}" required/>
+        <label class="field-label">SKU</label><input class="field" id="f_sku" value="${p.sku}" required/>
+        <label class="field-label">Category</label>
+        <select class="field" id="f_cat">${CATS.map(c=>`<option ${p.cat===c.name?'selected':''}>${c.name}</option>`).join("")}</select>
+        <div class="field-row">
+          <div><label class="field-label">Price ($)</label><input class="field" type="number" id="f_price" value="${p.price}" required/></div>
+          <div><label class="field-label">Stock qty</label><input class="field" type="number" id="f_stock" value="${p.stock}" required/></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-dark">Save Product</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+function saveProduct(e, id){
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("f_name").value,
+    sku: document.getElementById("f_sku").value,
+    cat: document.getElementById("f_cat").value,
+    price: Number(document.getElementById("f_price").value),
+    stock: Number(document.getElementById("f_stock").value),
+  };
+  data.status = data.stock === 0 ? "Out of Stock" : "Active";
+  if(id){ products = products.map(p=>p.id===id?{...p,...data}:p); }
+  else { products.push({...data, id: Date.now()}); }
+  closeModal();
+  renderMain();
+  return false;
+}
+function closeModal(e){ if(e) e.stopPropagation && e.stopPropagation(); document.getElementById("modalRoot").innerHTML=""; }
+
+/* -------------------------------- INVENTORY -------------------------------- */
+function viewInventory(){
+  return `
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Product</th><th>SKU</th><th>Current Stock</th><th>Level</th><th>Adjust</th></tr></thead>
+      <tbody>${products.map(p=>`
+        <tr>
+          <td>${p.name}</td><td>${p.sku}</td><td>${p.stock} units</td>
+          <td>${badge(p.stock===0?"Out of Stock":p.stock<=10?"Low":"In Stock")}</td>
+          <td><div style="display:flex;gap:8px;">
+            <button class="stock-btn" onclick="adjustStock(${p.id},-1)">−</button>
+            <button class="stock-btn" onclick="adjustStock(${p.id},1)">+</button>
+          </div></td>
+        </tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+}
+function adjustStock(id, delta){
+  products = products.map(p=>{
+    if(p.id!==id) return p;
+    const stock = Math.max(0, p.stock+delta);
+    return {...p, stock, status: stock===0?"Out of Stock":"Active"};
+  });
+  renderMain();
+}
+
+/* --------------------------------- ORDERS --------------------------------- */
+let orderTab = "orders";
+function setOrderTab(t){ orderTab=t; renderMain(); }
+function viewOrders(){
+  const ordersTable = `
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${orders.map(o=>`
+        <tr>
+          <td>#${o.id}</td><td>${o.customer}</td><td>${o.items}</td><td>${fmt(o.total)}</td>
+          <td>${badge(o.payment)}</td>
+          <td><select onchange="updateOrderStatus('${o.id}',this.value)" style="font-size:12px;padding:4px 8px;background:var(--card);border:none;border-radius:6px;">
+            ${["Processing","Shipped","Delivered","Cancelled"].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join("")}
+          </select></td>
+          <td>${o.date}</td>
+        </tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+  const customersTable = `
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Joined</th></tr></thead>
+      <tbody>${customers.map(c=>`<tr><td>${c.name}</td><td>${c.email}</td><td>${c.orders}</td><td>${fmt(c.spent)}</td><td>${c.joined}</td></tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+  return `
+  <div class="tabs">
+    <button class="tab ${orderTab==='orders'?'active':''}" onclick="setOrderTab('orders')">Orders</button>
+    <button class="tab ${orderTab==='customers'?'active':''}" onclick="setOrderTab('customers')">Customers</button>
+  </div>
+  ${orderTab==='orders' ? ordersTable : customersTable}`;
+}
+function updateOrderStatus(id, status){
+  orders = orders.map(o=>o.id===id?{...o,status}:o);
+  renderMain();
+}
+
+/* --------------------------------- COUPONS --------------------------------- */
+function viewCoupons(){
+  return `
+  <div class="toolbar"><button class="btn btn-dark" onclick="openCouponModal()">+ New Coupon</button></div>
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Uses</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+      <tbody>${coupons.map(c=>`
+        <tr>
+          <td>${c.code}</td><td>${c.type}</td><td>${c.value}</td><td>${c.uses}</td><td>${c.expires}</td>
+          <td>${badge(c.status)}</td>
+          <td><button onclick="toggleCoupon(${c.id})" style="font-size:11px;text-decoration:underline;color:var(--muted);">${c.status==='Active'?'Expire':'Reactivate'}</button></td>
+        </tr>`).join("")}</tbody>
+    </table>
+  </div>`;
+}
+function toggleCoupon(id){ coupons = coupons.map(c=>c.id===id?{...c,status:c.status==='Active'?'Expired':'Active'}:c); renderMain(); }
+function openCouponModal(){
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h3>New Coupon</h3><button onclick="closeModal()">✕</button></div>
+      <form onsubmit="return saveCoupon(event)">
+        <label class="field-label">Coupon code</label><input class="field" id="c_code" required/>
+        <label class="field-label">Discount type</label>
+        <select class="field" id="c_type"><option>Percentage</option><option>Fixed</option><option>Free Shipping</option></select>
+        <label class="field-label">Value (e.g. 10% or $5)</label><input class="field" id="c_value" required/>
+        <label class="field-label">Expiry date</label><input class="field" type="date" id="c_expires" required/>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-dark">Create Coupon</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+function saveCoupon(e){
+  e.preventDefault();
+  coupons.push({
+    id: Date.now(), code: document.getElementById("c_code").value.toUpperCase(),
+    type: document.getElementById("c_type").value, value: document.getElementById("c_value").value,
+    expires: document.getElementById("c_expires").value, uses:0, status:"Active",
+  });
+  closeModal(); renderMain();
+  return false;
+}
+
+/* -------------------------------- OFFERS -------------------------------- */
+function offerStatusFor(o){
+  const today = new Date().toISOString().slice(0,10);
+  if(today > o.endDate) return "Ended";
+  if(today < o.startDate) return "Scheduled";
+  return "Active";
+}
+function viewOffers(){
+  return `
+  <div class="toolbar"><button class="btn btn-dark" onclick="openOfferModal()">+ New Offer</button></div>
+  <div class="panel" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>Offer</th><th>Product</th><th>Original Price</th><th>Offer Price</th><th>Discount</th><th>Runs</th><th>Status</th><th></th></tr></thead>
+      <tbody>${offers.map(o=>{
+        const p = products.find(x=>x.id===o.productId);
+        if(!p) return "";
+        const status = offerStatusFor(o);
+        const pct = Math.round((1 - o.offerPrice/p.price) * 100);
+        return `
+        <tr>
+          <td>${o.title}</td><td>${p.name}</td>
+          <td style="text-decoration:line-through;color:var(--muted)">${fmt(p.price)}</td>
+          <td style="color:var(--sage);font-weight:600;">${fmt(o.offerPrice)}</td>
+          <td>${badge(pct+"% off").replace('b-neutral','b-good')}</td>
+          <td class="muted" style="font-size:12px;">${o.startDate} → ${o.endDate}</td>
+          <td>${badge(status)}</td>
+          <td class="row-actions"><button onclick="deleteOffer(${o.id})" style="color:#8A3B32;">🗑</button></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>
+    ${offers.length===0 ? `<p class="muted" style="padding:20px;font-size:13px;">No offers yet. Create one to feature a discounted product on the storefront.</p>` : ""}
+  </div>`;
+}
+function deleteOffer(id){ offers = offers.filter(o=>o.id!==id); renderMain(); }
+function openOfferModal(){
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h3>New Offer</h3><button onclick="closeModal()">✕</button></div>
+      <form onsubmit="return saveOffer(event)">
+        <label class="field-label">Offer title</label><input class="field" id="o_title" placeholder="e.g. Weekend Flash Sale" required/>
+        <label class="field-label">Product</label>
+        <select class="field" id="o_product" onchange="updateOfferPriceHint()">
+          ${products.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join("")}
+        </select>
+        <label class="field-label">Offer price ($) <span id="o_hint" class="muted"></span></label>
+        <input class="field" type="number" step="0.01" id="o_price" required/>
+        <div class="field-row">
+          <div><label class="field-label">Start date</label><input class="field" type="date" id="o_start" required/></div>
+          <div><label class="field-label">End date</label><input class="field" type="date" id="o_end" required/></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-dark">Create Offer</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+  updateOfferPriceHint();
+}
+function updateOfferPriceHint(){
+  const sel = document.getElementById("o_product");
+  if(!sel) return;
+  const p = products.find(x=>x.id===Number(sel.value));
+  document.getElementById("o_hint").textContent = p ? `(current price ${fmt(p.price)})` : "";
+}
+function saveOffer(e){
+  e.preventDefault();
+  const productId = Number(document.getElementById("o_product").value);
+  const offerPrice = Number(document.getElementById("o_price").value);
+  const startDate = document.getElementById("o_start").value;
+  const endDate = document.getElementById("o_end").value;
+  const p = products.find(x=>x.id===productId);
+  if(p && offerPrice >= p.price){
+    alert("Offer price should be lower than the current product price.");
+    return false;
+  }
+  offers.push({ id: Date.now(), productId, title: document.getElementById("o_title").value, offerPrice, startDate, endDate, status: "Active" });
+  closeModal(); renderMain();
+  return false;
+}
+
+/* ---------------------------------- CMS ---------------------------------- */
+function viewContent(){
+  return `
+  <div class="toolbar"><button class="btn btn-dark" onclick="openPostModal()">+ New Post</button></div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    ${posts.map(p=>`
+      <div class="panel" style="padding:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <p class="serif" style="font-size:15.5px;">${p.title}</p>
+          <p class="muted" style="font-size:12px;margin-top:2px;">${p.author} · ${p.date}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${badge(p.status)}
+          <button onclick="togglePost(${p.id})" style="font-size:11px;text-decoration:underline;color:var(--muted);">${p.status==='Published'?'Unpublish':'Publish'}</button>
+        </div>
+      </div>`).join("")}
+  </div>`;
+}
+function togglePost(id){ posts = posts.map(p=>p.id===id?{...p,status:p.status==='Published'?'Draft':'Published'}:p); renderMain(); }
+function openPostModal(){
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h3>New Blog Post</h3><button onclick="closeModal()">✕</button></div>
+      <form onsubmit="return savePost(event)">
+        <label class="field-label">Post title</label><input class="field" id="p_title" required/>
+        <label class="field-label">Author</label><input class="field" id="p_author" required/>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-dark">Save Draft</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+}
+function savePost(e){
+  e.preventDefault();
+  posts.unshift({id:Date.now(), title:document.getElementById("p_title").value, author:document.getElementById("p_author").value, status:"Draft", date:new Date().toISOString().slice(0,10)});
+  closeModal(); renderMain();
+  return false;
+}
+
+/* --------------------------------- BANNERS --------------------------------- */
+const toneBg = {sage:"linear-gradient(135deg,#c7d3bd,#94a984)", gold:"linear-gradient(135deg,#ecd9ae,#cfa863)", rose:"linear-gradient(135deg,#eecdd0,#dba3a8)"};
+function viewBanners(){
+  return `
+  <div class="grid" style="grid-template-columns:1fr 1fr;">
+    ${banners.map(b=>`
+      <div class="banner-card">
+        <div class="banner-media" style="background:${toneBg[b.tone]}"></div>
+        <div class="banner-body">
+          <p class="serif" style="font-size:16px;">${b.name}</p>
+          <p class="muted" style="font-size:12px;margin-top:2px;">${b.placement}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+            ${badge(b.status)}
+            <button onclick="toggleBanner(${b.id})" style="font-size:11px;text-decoration:underline;color:var(--muted);">${b.status==='Live'?'Pause':'Go Live'}</button>
+          </div>
+        </div>
+      </div>`).join("")}
+  </div>`;
+}
+function toggleBanner(id){ banners = banners.map(b=>b.id===id?{...b,status:b.status==='Live'?'Paused':'Live'}:b); renderMain(); }
+
+/* -------------------------------- ANALYTICS -------------------------------- */
+function viewAnalytics(){
+  const top = [...products].sort((a,b)=>b.price-a.price).slice(0,5);
+  const statuses = ["Processing","Shipped","Delivered","Cancelled"];
+  return `
+  <div class="panel" style="padding:20px;">
+    <h3 class="serif" style="font-size:17px;margin-bottom:16px;">Revenue trend, 12 weeks</h3>
+    ${bars(salesTrend)}
+  </div>
+  <div class="two-col" style="margin-top:20px;grid-template-columns:1fr 1fr;">
+    <div class="panel" style="padding:20px;">
+      <h3 class="serif" style="font-size:16px;margin-bottom:16px;">Top Products by Value</h3>
+      ${top.map(p=>`<div class="stat-line"><span>${p.name}</span><span class="muted">${fmt(p.price)}</span></div>`).join("")}
+    </div>
+    <div class="panel" style="padding:20px;">
+      <h3 class="serif" style="font-size:16px;margin-bottom:16px;">Order Status Breakdown</h3>
+      ${statuses.map(s=>{
+        const count = orders.filter(o=>o.status===s).length;
+        return `<div class="bar-row"><span class="lbl">${s}</span><div class="bar-track"><div class="bar-fill" style="width:${(count/orders.length)*100}%"></div></div><span class="muted" style="font-size:12px;">${count}</span></div>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+
+/* --------------------------------- SETTINGS --------------------------------- */
+function viewSettings(){
+  if(state.role!=="Admin") return `<p class="muted">Settings are Admin-only.</p>`;
+  const rows = [["Cash on Delivery","cod"],["Card Payments","card"],["UPI / Wallets","upi"],["Free shipping over $50","freeShipThreshold"],["Prices include tax","taxInclusive"],["Email order notifications","emailNotify"],["SMS order notifications","smsNotify"]];
+  return `
+  <div class="panel" style="padding:24px;max-width:560px;">
+    <h3 class="serif" style="font-size:18px;">🛡 Payment, Shipping & Notifications</h3>
+    <p class="muted" style="font-size:12.5px;margin:4px 0 20px;">Admin-only settings — changes apply store-wide.</p>
+    ${rows.map(([label,key])=>`
+      <div class="setting-row">
+        <span style="font-size:13.5px;">${label}</span>
+        <div class="toggle ${settings[key]?'on':''}" onclick="toggleSetting('${key}')"><div class="knob"></div></div>
+      </div>`).join("")}
+  </div>`;
+}
+function toggleSetting(key){ settings[key] = !settings[key]; renderMain(); }
+
+/* ---------------------------------- ROUTER ---------------------------------- */
+const VIEWS = {
+  dashboard: viewDashboard, products: viewProducts, inventory: viewInventory,
+  orders: viewOrders, coupons: viewCoupons, offers: viewOffers, content: viewContent,
+  banners: viewBanners, analytics: viewAnalytics, settings: viewSettings,
+};
+function renderMain(){
+  document.getElementById("pageTitle").textContent = TITLES[state.view] || "Dashboard";
+  document.getElementById("mainContent").innerHTML = (VIEWS[state.view] || viewDashboard)();
+}
+function render(){ renderNav(); renderMain(); }
+
+render();
+</script>
+</body>
+</html>

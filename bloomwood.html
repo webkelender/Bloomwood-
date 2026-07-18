@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bloomwood — Small-Batch Skincare & Cosmetics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FAF6EF; --card:#F1E9DA; --forest:#1F2E22; --forest2:#33402C;
+    --sage:#4A5D45; --gold:#B98A4A; --gold2:#C9A876; --ink:#2B2420; --muted:#9A8D74;
+    --text:#4A4436; --line:#E4DAC8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--ivory); color:var(--ink); line-height:1.5;}
+  img,svg{display:block; max-width:100%;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none;}
+  input,select{font-family:inherit;}
+  a{color:inherit; text-decoration:none;}
+  .serif{font-family:'Fraunces',serif;}
+  .mono{font-family:'Space Mono',monospace;}
+  .wrap{max-width:1152px; margin:0 auto; padding:0 20px;}
+  .btn{padding:12px 24px; font-size:13px; text-transform:uppercase; letter-spacing:.08em; border-radius:999px; font-family:'Space Mono',monospace; display:inline-flex; align-items:center; gap:6px;}
+  .btn-dark{background:var(--ink); color:var(--ivory);}
+  .btn-outline{border:1px solid #C9BBA0; color:var(--ink);}
+  .pill{padding:8px 14px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; border-radius:999px; font-family:'Space Mono',monospace;}
+  .badge{font-size:10px; text-transform:uppercase; letter-spacing:.1em; padding:4px 8px; font-family:'Space Mono',monospace; background:var(--ink); color:var(--ivory);}
+  .card{background:var(--card); border-radius:16px;}
+  .grid{display:grid; gap:20px;}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  @media(min-width:768px){ .md-grid-4{grid-template-columns:repeat(4,1fr);} .md-grid-3{grid-template-columns:repeat(3,1fr);} .md-grid-2{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:767px){ .md-grid-4,.md-grid-3,.md-grid-2{grid-template-columns:repeat(2,1fr);} }
+  .flex{display:flex;}
+  .center{align-items:center;}
+  .between{justify-content:space-between;}
+  .col{flex-direction:column;}
+  .gap8{gap:8px;} .gap12{gap:12px;} .gap16{gap:16px;} .gap24{gap:24px;}
+  .muted{color:var(--muted);}
+  .field{width:100%; padding:12px 16px; background:var(--card); border-radius:10px; border:none; outline:none; font-size:13.5px; color:var(--ink); margin-bottom:14px;}
+
+  /* header */
+  header{position:sticky; top:0; z-index:40; background:var(--ivory); border-bottom:1px solid var(--line);}
+  .header-inner{height:64px; display:flex; align-items:center; justify-content:space-between;}
+  .logo{font-family:'Fraunces',serif; font-size:22px; letter-spacing:.08em;}
+  nav.mainnav{display:none; gap:32px;}
+  @media(min-width:768px){ nav.mainnav{display:flex;} }
+  .navlink{font-size:13px; letter-spacing:.04em; text-transform:uppercase; font-family:'Space Mono',monospace; padding-bottom:4px; border-bottom:1.5px solid transparent;}
+  .navlink.active{border-bottom-color:var(--gold);}
+  .icon-btn{position:relative; background:none;}
+  .count-dot{position:absolute; top:-8px; right:-8px; background:var(--gold); color:var(--ivory); font-size:9px; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+  .search-box{display:none; align-items:center; gap:8px; padding:6px 12px; background:var(--card); border-radius:999px;}
+  @media(min-width:640px){ .search-box{display:flex;} }
+  .search-box input{background:none; border:none; outline:none; font-size:13px; width:120px;}
+  .mobile-menu{display:none; flex-direction:column; gap:12px; padding:0 20px 16px;}
+  .mobile-menu.open{display:flex;}
+  .hamburger{display:block;}
+  @media(min-width:768px){ .hamburger{display:none;} }
+
+  /* hero */
+  .hero{position:relative; overflow:hidden; background:var(--forest);}
+  .hero-inner{padding:96px 20px; display:grid; gap:40px; align-items:center; position:relative; z-index:2;}
+  @media(min-width:768px){ .hero-inner{grid-template-columns:1fr 1fr; padding:112px 32px;} }
+  .eyebrow{font-size:11px; letter-spacing:.2em; text-transform:uppercase; font-family:'Space Mono',monospace; color:var(--gold2);}
+  .hero h1{font-family:'Fraunces',serif; font-size:clamp(38px,5vw,64px); line-height:1.05; color:var(--ivory); margin-top:16px;}
+  .hero p{color:#CBD3C2; font-size:15px; line-height:1.7; margin-top:20px; max-width:420px;}
+  .hero-actions{display:flex; gap:16px; margin-top:32px;}
+  .hero .btn-outline{border-color:var(--sage); color:var(--ivory);}
+  .hero-bottles{display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:320px; margin:0 auto;}
+  .wave{position:absolute; bottom:-1px; left:0; width:100%; height:40px;}
+
+  /* bottle graphic */
+  .bottle-wrap{position:relative; width:100%; aspect-ratio:4/5; display:flex; align-items:center; justify-content:center;}
+  .bottle-badge{position:absolute; top:12px; left:12px; z-index:2; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:4px 8px; background:var(--ink); color:var(--ivory); font-family:'Space Mono',monospace;}
+  .bottle{width:58%; height:72%; display:flex; flex-direction:column; align-items:center;}
+  .bottle-cap{width:34%; height:9%; border-radius:3px 3px 0 0;}
+  .bottle-body{width:100%; height:91%; border-radius:14px; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:inset -8px 0 16px rgba(0,0,0,.08), 0 12px 24px -12px rgba(43,36,32,.35);}
+  .bottle-leaf{position:absolute; inset:30% 14%; border:1px solid currentColor; opacity:.3; display:flex; align-items:center; justify-content:center;}
+  .tone-rose .bottle-cap{background:#4a3b3c;} .tone-rose .bottle-body{background:linear-gradient(155deg,#eecdd0,#dba3a8); color:#4a3b3c;}
+  .tone-sage .bottle-cap{background:#33402c;} .tone-sage .bottle-body{background:linear-gradient(155deg,#c7d3bd,#94a984); color:#33402c;}
+  .tone-gold .bottle-cap{background:#4a3a1c;} .tone-gold .bottle-body{background:linear-gradient(155deg,#ecd9ae,#cfa863); color:#4a3a1c;}
+  .tone-ivory .bottle-cap{background:#4a4436;} .tone-ivory .bottle-body{background:linear-gradient(155deg,#f6f0e4,#e3d7c0); color:#4a4436;}
+
+  /* category strip */
+  .cat-card{display:flex; flex-direction:column; align-items:center; gap:12px; padding:32px 0; border-radius:18px; background:var(--card); transition:transform .15s;}
+  .cat-card:hover{transform:translateY(-4px);}
+  .cat-emoji{font-size:28px;}
+  .cat-label{font-size:13px; text-transform:uppercase; letter-spacing:.06em; font-family:'Space Mono',monospace;}
+
+  /* product card */
+  .p-card-media{position:relative; border-radius:16px; overflow:hidden; background:var(--card); display:block; width:100%;}
+  .wish-toggle{position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(250,246,239,.9); display:flex; align-items:center; justify-content:center; z-index:2;}
+  .p-info{padding-top:12px;}
+  .p-cat{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-family:'Space Mono',monospace;}
+  .p-name{font-family:'Fraunces',serif; font-size:17px; margin-top:4px; display:block; text-align:left;}
+  .stars{display:flex; gap:2px; align-items:center;}
+  .p-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:8px;}
+  .add-btn{font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:6px 14px; background:var(--ink); color:var(--ivory); border-radius:999px; font-family:'Space Mono',monospace;}
+
+  section{padding:56px 0;}
+  .section-head{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px;}
+  .section-head h2{font-family:'Fraunces',serif; font-size:28px;}
+
+  .spotlight{background:var(--forest2); padding:80px 0; color:var(--ivory);}
+  .spotlight-inner{display:grid; gap:40px; align-items:center; max-width:960px; margin:0 auto; padding:0 20px;}
+  @media(min-width:768px){ .spotlight-inner{grid-template-columns:1fr 1fr;} }
+  .spotlight h3{font-family:'Fraunces',serif; font-size:34px; margin-top:12px;}
+  .spotlight p{color:#D6DECA; font-size:14.5px; line-height:1.8; margin-top:16px; max-width:420px;}
+  .stat-row{display:flex; gap:32px; margin-top:24px;}
+  .stat-k{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#93A186; font-family:'Space Mono',monospace;}
+  .stat-v{font-size:14px; margin-top:4px;}
+
+  .newsletter{max-width:600px; margin:0 auto; padding:80px 20px; text-align:center;}
+  .newsletter h3{font-family:'Fraunces',serif; font-size:28px;}
+  .newsletter p{color:var(--muted); font-size:14px; margin-top:8px;}
+  .nl-form{display:flex; max-width:360px; margin:24px auto 0;}
+  .nl-form input{flex:1; padding:14px 16px; background:var(--card); border-radius:999px 0 0 999px; border:none; outline:none; font-size:13px;}
+  .nl-form button{padding:14px 20px; background:var(--ink); color:var(--ivory); border-radius:0 999px 999px 0; font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-family:'Space Mono',monospace;}
+
+  footer{background:var(--forest); margin-top:auto;}
+  .footer-grid{display:grid; gap:40px; padding:56px 20px; grid-template-columns:1fr;}
+  @media(min-width:640px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+  @media(min-width:768px){ .footer-grid{grid-template-columns:2fr 1fr 1fr 1fr;} }
+  .footer-grid h4{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold2); font-family:'Space Mono',monospace; margin-bottom:12px;}
+  .footer-grid a, .footer-grid button{display:block; color:#C9D3BE; font-size:13px; margin-bottom:8px; text-align:left;}
+  .footer-bottom{border-top:1px solid #3A4636; padding:20px; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; color:#8A9682; font-size:11.5px;}
+
+  /* catalog */
+  .filters{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:24px 0;}
+  .filters select{padding:8px 12px; background:var(--card); border:none; border-radius:8px; font-size:12px;}
+
+  /* product detail */
+  .detail-grid{display:grid; gap:40px; margin-top:16px;}
+  @media(min-width:768px){ .detail-grid{grid-template-columns:1fr 1fr;} }
+  .qty-box{display:flex; align-items:center; background:var(--card); border-radius:999px;}
+  .qty-box button{padding:12px;}
+  .perks{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding-top:24px; margin-top:32px; border-top:1px solid var(--line); text-align:center;}
+  .perks div{display:flex; flex-direction:column; align-items:center; gap:8px; font-size:10.5px; color:#7A6E5B;}
+
+  /* cart */
+  .cart-line{display:flex; gap:16px; align-items:center; padding-bottom:20px; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .cart-thumb{width:72px; border-radius:10px; background:var(--card);}
+  .summary-box{background:var(--card); border-radius:16px; padding:24px; height:fit-content;}
+  .summary-row{display:flex; justify-content:space-between; font-size:13px; margin-top:12px;}
+
+  /* auth */
+  .auth-grid{display:grid; min-height:520px;}
+  @media(min-width:768px){ .auth-grid{grid-template-columns:1fr 1fr;} }
+  .auth-visual{display:none; align-items:center; justify-content:center; background:var(--forest); padding:40px;}
+  @media(min-width:768px){ .auth-visual{display:flex;} }
+  .auth-form-wrap{display:flex; align-items:center; justify-content:center; padding:64px 24px;}
+
+  /* badges/status */
+  .status-pill{font-size:11px; padding:4px 10px; border-radius:999px; font-family:'Space Mono',monospace; text-transform:uppercase;}
+  .status-processing{background:#F3E2C4; color:#7A5A20;}
+  .status-shipped{background:#DCE3EC; color:#31445E;}
+  .status-delivered{background:#DCE6D4; color:#33402C;}
+  .progress-track{display:flex; gap:8px; margin-top:12px;}
+  .progress-seg{flex:1; height:6px; border-radius:999px; background:var(--line);}
+  .progress-seg.done{background:var(--sage);}
+
+  .empty{text-align:center; padding:96px 20px;}
+  .empty h2{font-family:'Fraunces',serif; font-size:22px; margin-top:16px;}
+
+  .blog-card{background:var(--card); border-radius:16px; padding:24px;}
+  .blog-tag{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--gold); font-family:'Space Mono',monospace;}
+  .blog-card h3{font-family:'Fraunces',serif; font-size:19px; margin-top:12px; line-height:1.3;}
+  .blog-card p{color:#7A6E5B; font-size:13.5px; margin-top:8px; line-height:1.7;}
+
+  .about-hero{max-width:720px; margin:0 auto; padding:64px 20px; text-align:center;}
+  .about-hero p{color:var(--text); font-size:15px; line-height:1.8; margin-top:20px;}
+  .about-cols{background:var(--card); padding:64px 0;}
+  .about-cols .wrap{display:grid; gap:32px; text-align:center;}
+  @media(min-width:640px){ .about-cols .wrap{grid-template-columns:repeat(3,1fr);} }
+  .about-cols h3{font-family:'Fraunces',serif; font-size:19px;}
+  .about-cols p{color:#7A6E5B; font-size:13.5px; margin-top:8px; line-height:1.7;}
+
+  #view{min-height:60vh;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <button class="hamburger" id="menuToggle" aria-label="Menu">☰</button>
+    <button class="logo" onclick="setView('home')">Bloomwood</button>
+    <nav class="mainnav" id="mainNav"></nav>
+    <div class="flex center gap16">
+      <div class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" placeholder="Search products" oninput="onSearch(this.value)"/>
+      </div>
+      <button class="icon-btn" onclick="setView('wishlist')" aria-label="Wishlist">♡<span class="count-dot" id="wishCount" style="display:none">0</span></button>
+      <button class="icon-btn" onclick="setView('cart')" aria-label="Cart">🛍<span class="count-dot" id="cartCount" style="display:none">0</span></button>
+      <button class="icon-btn" onclick="setView('account')" aria-label="Account">☺</button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu"></div>
+</header>
+
+<div id="view"></div>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <p class="serif" style="font-size:20px;color:var(--ivory);">Bloomwood</p>
+      <p style="color:#9AA791;font-size:13px;margin-top:12px;line-height:1.7;">Small-batch skincare and cosmetics, formulated with restraint.</p>
+    </div>
+    <div>
+      <h4>Shop</h4>
+      <button onclick="setCatAndView('Skincare')">Skincare</button>
+      <button onclick="setCatAndView('Makeup')">Makeup</button>
+      <button onclick="setCatAndView('Haircare')">Haircare</button>
+      <button onclick="setCatAndView('Body')">Body</button>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <button onclick="setView('about')">About</button>
+      <button onclick="setView('blog')">Journal</button>
+      <button onclick="setView('home')">Careers</button>
+    </div>
+    <div>
+      <h4>Support</h4>
+      <button onclick="setView('home')">Contact</button>
+      <button onclick="setView('home')">Shipping</button>
+      <button onclick="setView('home')">Returns</button>
+      <button onclick="setView('home')">FAQ</button>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Bloomwood Cosmetics. All rights reserved.</span>
+    <span>✉ hello@bloomwood.co</span>
+  </div>
+</footer>
+
+<script>
+/* ---------------------------------- DATA ---------------------------------- */
+const CATEGORIES = ["Skincare","Makeup","Haircare","Body"];
+const SKIN_TYPES = ["Dry","Oily","Combination","Sensitive","All Types"];
+const PRODUCTS = [
+  {id:1,name:"Bloomwater Cream Cleanser",cat:"Skincare",skin:"Dry",price:28,badge:"Bestseller",tone:"rose",rating:4.8,reviews:214,size:"150ml",desc:"A milk-soft cleanser infused with rose water and oat extract that lifts away the day without stripping the skin's natural barrier."},
+  {id:2,name:"Verdant Clay Purifying Mask",cat:"Skincare",skin:"Oily",price:34,badge:"New",tone:"sage",rating:4.6,reviews:98,size:"75ml",desc:"French green clay and willowbark draw out congestion while chamomile keeps the process calm, not stripped."},
+  {id:3,name:"Golden Hour Vitamin C Serum",cat:"Skincare",skin:"All Types",price:46,badge:"Bestseller",tone:"gold",rating:4.9,reviews:342,size:"30ml",desc:"15% stabilised vitamin C brightens tone and softens fine lines over eight weeks of nightly use."},
+  {id:4,name:"Hush Barrier Repair Balm",cat:"Skincare",skin:"Sensitive",price:32,tone:"ivory",rating:4.7,reviews:156,size:"50ml",desc:"Ceramides and squalane rebuild a compromised barrier for skin that flushes, stings, or reacts easily."},
+  {id:5,name:"Petal Silk Blush Duo",cat:"Makeup",skin:"All Types",price:24,badge:"New",tone:"rose",rating:4.5,reviews:87,size:"8g",desc:"Two blendable cream shades that mimic the flush of skin warmed by sun, not powder."},
+  {id:6,name:"Understated Tinted Balm",cat:"Makeup",skin:"All Types",price:22,tone:"gold",rating:4.4,reviews:63,size:"12ml",desc:"Sheer, buildable coverage with a satin finish and jojoba oil that treats lips as it colours them."},
+  {id:7,name:"Botanical Root Repair Oil",cat:"Haircare",skin:"All Types",price:38,badge:"Bestseller",tone:"sage",rating:4.8,reviews:201,size:"100ml",desc:"Rosemary, biotin, and argan oil work into the scalp to encourage stronger growth from the root."},
+  {id:8,name:"Silt & Salt Volumising Spray",cat:"Haircare",skin:"All Types",price:26,tone:"ivory",rating:4.3,reviews:74,size:"150ml",desc:"A sea-mineral texturiser for soft, undone waves without the crunch of traditional salt sprays."},
+  {id:9,name:"Fig Milk Body Polish",cat:"Body",skin:"Dry",price:30,tone:"gold",rating:4.6,reviews:129,size:"220g",desc:"Fine sugar crystals and fig extract buff away rough patches, leaving skin softened, not raw."},
+  {id:10,name:"Warm Clay Hand & Body Wash",cat:"Body",skin:"All Types",price:20,tone:"sage",rating:4.5,reviews:91,size:"300ml",desc:"A low-lather, pH-balanced wash scented with cedar and clay for skin that never feels tight after."},
+  {id:11,name:"Quiet Hours Overnight Mask",cat:"Skincare",skin:"Combination",price:40,badge:"New",tone:"rose",rating:4.7,reviews:118,size:"50ml",desc:"A weightless gel-cream that works while you sleep, delivering peptides and hyaluronic acid till morning."},
+  {id:12,name:"Terracotta Cream Bronzer",cat:"Makeup",skin:"All Types",price:26,tone:"gold",rating:4.6,reviews:145,size:"10g",desc:"A cream-to-powder bronzer that melts into skin for warmth that looks earned, not applied."},
+];
+const BLOG_POSTS = [
+  {id:1,title:"The Case for a Slower Skincare Routine",excerpt:"Why fewer steps, done with attention, tend to outperform a crowded shelf of actives.",tag:"Ritual"},
+  {id:2,title:"Reading Your Skin Barrier Like a Map",excerpt:"Redness, tightness, and breakouts are signals, not flaws — here's how to read them.",tag:"Skin Science"},
+  {id:3,title:"What 'Clean' Actually Means on Our Labels",excerpt:"A plain-language walkthrough of how we vet every ingredient before it reaches a bottle.",tag:"Inside Bloomwood"},
+];
+
+/* --------------------------------- STATE --------------------------------- */
+let state = {
+  view: "home", product: null, search: "", catFilter: "All", skinFilter: "All", sort: "featured",
+  cart: [], wishlist: [], orders: [], user: null, checkoutStep: 1, menuOpen: false,
+};
+
+/* -------------------------------- HELPERS -------------------------------- */
+function fmt(n){ return "$" + Number(n).toFixed(2); }
+function starRow(rating){
+  let s = "";
+  for(let i=1;i<=5;i++){ s += `<span style="color:#B98A4A;opacity:${i<=Math.round(rating)?1:.3}">★</span>`; }
+  return `<div class="stars">${s}</div>`;
+}
+function bottleHTML(tone, badge, sizePct){
+  sizePct = sizePct || 100;
+  return `
+  <div class="bottle-wrap">
+    ${badge ? `<span class="bottle-badge">${badge}</span>` : ""}
+    <div class="bottle tone-${tone}" style="transform:scale(${sizePct/100})">
+      <div class="bottle-cap"></div>
+      <div class="bottle-body"><div class="bottle-leaf">🌿</div></div>
+    </div>
+  </div>`;
+}
+function productCard(p){
+  const inWish = state.wishlist.includes(p.id);
+  return `
+  <div>
+    <button class="p-card-media" onclick="openProduct(${p.id})">
+      ${bottleHTML(p.tone, p.badge)}
+      <span class="wish-toggle" onclick="event.stopPropagation(); toggleWish(${p.id})">${inWish ? "♥" : "♡"}</span>
+    </button>
+    <div class="p-info">
+      <p class="p-cat">${p.cat}</p>
+      <button class="p-name" onclick="openProduct(${p.id})">${p.name}</button>
+      <div class="flex center gap8" style="margin-top:4px;">${starRow(p.rating)}<span style="font-size:11px;color:var(--muted)">(${p.reviews})</span></div>
+      <div class="p-bottom">
+        <span style="font-weight:500;">${fmt(p.price)}</span>
+        <button class="add-btn" onclick="addToCart(${p.id},1)">Add</button>
+      </div>
+    </div>
+  </div>`;
+}
+function productGrid(list){
+  if(list.length === 0){
+    return `<div class="empty"><h2>No products match yet.</h2><p class="muted" style="margin-top:8px;">Try clearing a filter or searching a different term.</p></div>`;
+  }
+  return `<div class="grid grid-2 md-grid-4">${list.map(productCard).join("")}</div>`;
+}
+
+/* --------------------------------- HEADER --------------------------------- */
+const NAV_ITEMS = [["home","Home"],["catalog","Shop"],["about","About"],["blog","Journal"]];
+function renderHeader(){
+  document.getElementById("mainNav").innerHTML = NAV_ITEMS.map(([k,l]) =>
+    `<button class="navlink ${state.view===k?"active":""}" onclick="setView('${k}')">${l}</button>`).join("");
+  document.getElementById("mobileMenu").innerHTML = NAV_ITEMS.map(([k,l]) =>
+    `<button style="text-align:left;font-size:14px;text-transform:uppercase;" onclick="setView('${k}')">${l}</button>`).join("");
+  document.getElementById("mobileMenu").classList.toggle("open", state.menuOpen);
+  document.getElementById("searchInput").value = state.search;
+
+  const cartCount = state.cart.reduce((s,i)=>s+i.qty,0);
+  const wc = document.getElementById("wishCount"), cc = document.getElementById("cartCount");
+  wc.style.display = state.wishlist.length ? "flex" : "none"; wc.textContent = state.wishlist.length;
+  cc.style.display = cartCount ? "flex" : "none"; cc.textContent = cartCount;
+}
+
+/* ---------------------------------- HOME ---------------------------------- */
+function viewHome(){
+  const bestsellers = PRODUCTS.filter(p=>p.badge==="Bestseller").slice(0,4);
+  return `
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <span class="eyebrow">Batch No. 026 — Autumn Ritual</span>
+        <h1>Skincare that reads like a quiet morning.</h1>
+        <p>Small-batch formulas made with botanical actives and none of the noise. Built for skin, not for shelves.</p>
+        <div class="hero-actions">
+          <button class="btn btn-dark" style="background:var(--gold2);color:var(--forest);" onclick="setView('catalog')">Shop the Edit</button>
+          <button class="btn btn-outline" onclick="setView('about')">Our Story</button>
+        </div>
+      </div>
+      <div class="hero-bottles">
+        <div style="margin-top:32px;">${bottleHTML("rose")}</div>
+        <div>${bottleHTML("gold")}</div>
+      </div>
+    </div>
+    <svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,32 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#FAF6EF"/></svg>
+  </section>
+
+  <section class="wrap">
+    <div class="grid grid-2 md-grid-4">
+      ${CATEGORIES.map(c=>`
+        <button class="cat-card" onclick="setCatAndView('${c}')">
+          <span class="cat-emoji">${({Skincare:"🌿",Makeup:"🌸",Haircare:"🌾",Body:"🫙"})[c]}</span>
+          <span class="cat-label">${c}</span>
+        </button>`).join("")}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="section-head">
+      <h2>The Bestsellers</h2>
+      <span class="mono" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Reordered weekly</span>
+    </div>
+    ${productGrid(bestsellers)}
+  </section>
+
+  ${spotlightHTML()}
+
+  <section class="newsletter">
+    <h3>Join the mailing list</h3>
+    <p>New formulas, restock notes, and 10% off your first order.</p>
+    <div id="nlResult"></div>
+    <form class="nl-form" id="nlForm" onsubmit="return submitNewsletter(event)">
+      <input required type="email" placeholder="you@email.com"/>
+      <button type="submit">Join</button>
+    </form>
+  </section>`;
+}
+function spotlightHTML(){
+  return `
+  <section class="spotlight">
+    <div class="spotlight-inner">
+      <div>
+        <span class="eyebrow">Ingredient Focus</span>
+        <h3>Rosemary, root to bottle.</h3>
+        <p>We trace every rosemary batch to a single co-op in the Peloponnese, cold-pressed within a day of harvest to hold onto the compounds that actually support scalp circulation — not just the scent.</p>
+        <div class="stat-row">
+          <div><p class="stat-k">Sourced</p><p class="stat-v">Greece</p></div>
+          <div><p class="stat-k">Batches</p><p class="stat-v">Small, seasonal</p></div>
+          <div><p class="stat-k">Tested</p><p class="stat-v">8-week clinical</p></div>
+        </div>
+      </div>
+      <div style="max-width:260px;margin:0 auto;">${bottleHTML("sage")}</div>
+    </div>
+  </section>`;
+}
+function submitNewsletter(e){
+  e.preventDefault();
+  document.getElementById("nlResult").innerHTML = `<p style="color:var(--sage);font-size:14px;margin-top:16px;">You're on the list — check your inbox for the code.</p>`;
+  document.getElementById("nlForm").style.display = "none";
+  return false;
+}
+
+/* --------------------------------- CATALOG --------------------------------- */
+function viewCatalog(){
+  let list = PRODUCTS.filter(p=>p.name.toLowerCase().includes(state.search.toLowerCase()));
+  if(state.catFilter !== "All") list = list.filter(p=>p.cat===state.catFilter);
+  if(state.skinFilter !== "All") list = list.filter(p=>p.skin===state.skinFilter || p.skin==="All Types");
+  if(state.sort==="price-asc") list = [...list].sort((a,b)=>a.price-b.price);
+  if(state.sort==="price-desc") list = [...list].sort((a,b)=>b.price-a.price);
+  if(state.sort==="rating") list = [...list].sort((a,b)=>b.rating-a.rating);
+
+  return `
+  <div class="wrap" style="padding:48px 20px;">
+    <h1 class="serif" style="font-size:34px;">Shop the Edit</h1>
+    <p class="muted" style="font-size:13px;margin-top:4px;">${list.length} products</p>
+    <div class="filters">
+      <button class="pill" style="background:${state.catFilter==='All'?'var(--ink)':'var(--card)'};color:${state.catFilter==='All'?'var(--ivory)':'var(--ink)'}" onclick="setCat('All')">All</button>
+      ${CATEGORIES.map(c=>`<button class="pill" style="background:${state.catFilter===c?'var(--ink)':'var(--card)'};color:${state.catFilter===c?'var(--ivory)':'var(--ink)'}" onclick="setCat('${c}')">${c}</button>`).join("")}
+      <div style="margin-left:auto;display:flex;gap:12px;">
+        <select onchange="setSkin(this.value)">
+          <option value="All" ${state.skinFilter==='All'?'selected':''}>All Skin Types</option>
+          ${SKIN_TYPES.map(s=>`<option value="${s}" ${state.skinFilter===s?'selected':''}>${s}</option>`).join("")}
+        </select>
+        <select onchange="setSort(this.value)">
+          <option value="featured" ${state.sort==='featured'?'selected':''}>Featured</option>
+          <option value="price-asc" ${state.sort==='price-asc'?'selected':''}>Price: Low to High</option>
+          <option value="price-desc" ${state.sort==='price-desc'?'selected':''}>Price: High to Low</option>
+          <option value="rating" ${state.sort==='rating'?'selected':''}>Top Rated</option>
+        </select>
+      </div>
+    </div>
+    ${productGrid(list)}
+  </div>`;
+}
+function setCat(c){ state.catFilter=c; render(); }
+function setSkin(v){ state.skinFilter=v; render(); }
+function setSort(v){ state.sort=v; render(); }
+function setCatAndView(c){ state.catFilter=c; setView("catalog"); }
+function onSearch(v){ state.search=v; if(state.view!=="catalog") state.view="catalog"; render(); }
+
+/* ------------------------------ PRODUCT DETAIL ------------------------------ */
+function viewDetail(){
+  const p = state.product;
+  if(!p) return viewCatalog();
+  const related = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,4);
+  const inWish = state.wishlist.includes(p.id);
+  return `
+  <div class="wrap" style="padding:40px 20px;">
+    <button onclick="setView('catalog')" class="muted" style="font-size:12px;margin-bottom:24px;">← Back to shop</button>
+    <div class="detail-grid">
+      <div class="card">${bottleHTML(p.tone,p.badge,105)}</div>
+      <div>
+        <p class="p-cat">${p.cat} · ${p.size}</p>
+        <h1 class="serif" style="font-size:32px;margin-top:8px;">${p.name}</h1>
+        <div class="flex center gap8" style="margin-top:8px;">${starRow(p.rating)}<span style="font-size:12px;color:var(--muted)">${p.rating} (${p.reviews} reviews)</span></div>
+        <p style="margin-top:20px;font-size:15px;color:var(--text);line-height:1.8;">${p.desc}</p>
+        <p class="serif" style="margin-top:24px;font-size:24px;">${fmt(p.price)}</p>
+        <div class="flex center gap16" style="margin-top:24px;">
+          <div class="qty-box">
+            <button onclick="changeQty(-1)">−</button>
+            <span id="qtyVal" style="width:24px;text-align:center;">1</span>
+            <button onclick="changeQty(1)">+</button>
+          </div>
+          <button class="btn btn-dark" style="flex:1;" onclick="addToCart(${p.id}, currentQty())">Add to Bag — <span id="qtyPrice">${fmt(p.price)}</span></button>
+          <button class="icon-btn" style="background:var(--card);border-radius:50%;padding:12px;" onclick="toggleWish(${p.id})">${inWish?"♥":"♡"}</button>
+        </div>
+        <div class="perks">
+          <div><span>🚚</span>Free shipping $50+</div>
+          <div><span>🛡</span>Dermat. tested</div>
+          <div><span>↺</span>30-day returns</div>
+        </div>
+      </div>
+    </div>
+    ${related.length ? `
+    <div style="margin-top:64px;">
+      <h2 class="serif" style="font-size:24px;margin-bottom:24px;">You may also like</h2>
+      ${productGrid(related)}
+    </div>` : ""}
+  </div>`;
+}
+window._qty = 1;
+function currentQty(){ return window._qty; }
+function changeQty(d){
+  window._qty = Math.max(1, window._qty + d);
+  document.getElementById("qtyVal").textContent = window._qty;
+  document.getElementById("qtyPrice").textContent = fmt(state.product.price * window._qty);
+}
+function openProduct(id){
+  state.product = PRODUCTS.find(p=>p.id===id);
+  window._qty = 1;
+  setView("detail");
+}
+
+/* ---------------------------------- CART ---------------------------------- */
+function addToCart(id, qty){
+  const p = PRODUCTS.find(x=>x.id===id);
+  const existing = state.cart.find(i=>i.id===id);
+  if(existing) existing.qty += qty;
+  else state.cart.push({...p, qty});
+  render();
+}
+function updateQty(id, delta){
+  const item = state.cart.find(i=>i.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0) state.cart = state.cart.filter(i=>i.id!==id);
+  render();
+}
+function removeFromCart(id){ state.cart = state.cart.filter(i=>i.id!==id); render(); }
+
+function viewCart(){
+  if(state.cart.length===0){
+    return `<div class="empty"><div style="font-size:28px;">🛍</div><h2>Your bag is empty.</h2>
+    <button class="btn btn-dark" style="margin-top:24px;" onclick="setView('catalog')">Browse Products</button></div>`;
+  }
+  const subtotal = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const shipping = subtotal >= 50 ? 0 : 6;
+  return `
+  <div class="wrap" style="max-width:900px;padding:48px 20px;">
+    <h1 class="serif" style="font-size:32px;">Your Bag</h1>
+    <div class="grid md-grid-2" style="grid-template-columns:2fr 1fr;margin-top:32px;align-items:start;">
+      <div>
+        ${state.cart.map(i=>`
+          <div class="cart-line">
+            <div class="cart-thumb">${bottleHTML(i.tone)}</div>
+            <div style="flex:1;">
+              <p class="serif" style="font-size:16px;">${i.name}</p>
+              <p class="muted" style="font-size:12px;margin-top:2px;">${fmt(i.price)} each</p>
+              <div class="flex center gap12" style="margin-top:8px;">
+                <div class="qty-box">
+                  <button onclick="updateQty(${i.id},-1)" style="padding:6px 10px;">−</button>
+                  <span style="width:20px;text-align:center;font-size:13px;">${i.qty}</span>
+                  <button onclick="updateQty(${i.id},1)" style="padding:6px 10px;">+</button>
+                </div>
+                <button onclick="removeFromCart(${i.id})" style="font-size:11px;text-decoration:underline;color:var(--muted);">Remove</button>
+              </div>
+            </div>
+            <p class="serif">${fmt(i.price*i.qty)}</p>
+          </div>`).join("")}
+      </div>
+      <div class="summary-box">
+        <h3 class="serif" style="font-size:18px;">Order Summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${shipping===0?"Free":fmt(shipping)}</span></div>
+        <div class="summary-row" style="border-top:1px solid var(--line);padding-top:12px;margin-top:12px;font-size:15px;font-weight:500;"><span>Total</span><span>${fmt(subtotal+shipping)}</span></div>
+        <button class="btn btn-dark" style="width:100%;justify-content:center;margin-top:20px;" onclick="setView('checkout')">Secure Checkout</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* -------------------------------- CHECKOUT -------------------------------- */
+function viewCheckout(){
+  const subtotal = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const total = subtotal + (subtotal>=50?0:6);
+  const step = state.checkoutStep;
+  let body = "";
+  if(step===1){
+    body = `
+    <div class="grid md-grid-2" style="grid-template-columns:1fr 1fr;">
+      <input class="field" placeholder="Full name" required/>
+      <input class="field" placeholder="Phone number" required/>
+    </div>
+    <input class="field" placeholder="Street address" required/>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+      <input class="field" placeholder="City" required/>
+      <input class="field" placeholder="State" required/>
+      <input class="field" placeholder="PIN Code" required/>
+    </div>`;
+  } else if(step===2){
+    body = `
+    <input class="field" placeholder="Card number" required/>
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      <input class="field" placeholder="MM / YY" required/>
+      <input class="field" placeholder="CVC" required/>
+    </div>
+    <p class="muted" style="font-size:11px;">This is a prototype — no real payment is processed.</p>`;
+  } else {
+    body = `<div class="card" style="padding:20px;">
+      ${state.cart.map(i=>`<div class="flex between" style="font-size:13px;padding:4px 0;color:var(--text);"><span>${i.name} × ${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join("")}
+      <div class="flex between" style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;font-size:15px;"><span>Total</span><span>${fmt(total)}</span></div>
+    </div>`;
+  }
+  return `
+  <div class="wrap" style="max-width:640px;padding:48px 20px;">
+    <h1 class="serif" style="font-size:30px;">Checkout</h1>
+    <div class="flex gap24" style="margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;" class="mono">
+      <span style="color:${step>=1?'var(--ink)':'var(--muted)'}">1. Shipping</span>
+      <span style="color:${step>=2?'var(--ink)':'var(--muted)'}">2. Payment</span>
+      <span style="color:${step>=3?'var(--ink)':'var(--muted)'}">3. Review</span>
+    </div>
+    <form id="checkoutForm" onsubmit="return checkoutNext(event)" style="margin-top:32px;">
+      ${body}
+      <div class="flex gap12" style="margin-top:16px;">
+        ${step>1 ? `<button type="button" class="btn btn-outline" onclick="checkoutBack()">Back</button>` : ""}
+        <button type="submit" class="btn btn-dark" style="flex:1;justify-content:center;">${step<3 ? "Continue" : "Place Order — "+fmt(total)}</button>
+      </div>
+    </form>
+  </div>`;
+}
+function checkoutNext(e){
+  e.preventDefault();
+  if(state.checkoutStep<3){ state.checkoutStep++; render(); }
+  else placeOrder();
+  return false;
+}
+function checkoutBack(){ state.checkoutStep--; render(); }
+function placeOrder(){
+  const subtotal = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const total = subtotal + (subtotal>=50?0:6);
+  const order = { id: "BW"+Math.floor(1000+Math.random()*9000), items: state.cart, total, status: "Processing", date: new Date().toLocaleDateString() };
+  state.orders.unshift(order);
+  state.cart = [];
+  state.checkoutStep = 1;
+  setView("orderSuccess");
+}
+function viewOrderSuccess(){
+  const order = state.orders[0];
+  return `
+  <div class="empty" style="max-width:420px;margin:0 auto;">
+    <div style="width:56px;height:56px;border-radius:50%;background:var(--forest2);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:22px;color:var(--ivory);">📦</div>
+    <h2>Order placed.</h2>
+    <p class="muted" style="font-size:13px;margin-top:8px;">Confirmation <strong>${order?order.id:""}</strong> is on its way to your inbox.</p>
+    <div class="flex gap12" style="justify-content:center;margin-top:32px;">
+      <button class="btn btn-dark" onclick="setView('orders')">Track Order</button>
+      <button class="btn btn-outline" onclick="setView('catalog')">Keep Shopping</button>
+    </div>
+  </div>`;
+}
+
+/* ------------------------------ ACCOUNT / AUTH ------------------------------ */
+let authMode = "login";
+function viewAuth(){
+  return `
+  <div class="auth-grid">
+    <div class="auth-visual">
+      <div style="text-align:center;">
+        <div style="max-width:220px;margin:0 auto;">${bottleHTML("rose")}</div>
+        <p class="serif" style="max-width:280px;margin:24px auto 0;font-size:22px;color:var(--ivory);">"The best routine is the one you actually finish."</p>
+      </div>
+    </div>
+    <div class="auth-form-wrap">
+      <div style="width:100%;max-width:360px;">
+        <h1 class="serif" style="font-size:28px;">${authMode==='login'?'Welcome back':'Create account'}</h1>
+        <p class="muted" style="font-size:13px;margin-top:4px;">${authMode==='login'?'Log in to track orders and manage your wishlist.':'Join for early access to new formulas.'}</p>
+        <form onsubmit="return submitAuth(event)" style="margin-top:32px;">
+          ${authMode==='signup' ? `<input class="field" id="authName" placeholder="Full name" required/>` : ""}
+          <input class="field" id="authEmail" type="email" placeholder="Email address" required/>
+          <input class="field" id="authPass" type="password" placeholder="Password" required/>
+          <button type="submit" class="btn btn-dark" style="width:100%;justify-content:center;">${authMode==='login'?'Log In':'Sign Up'}</button>
+        </form>
+        <p class="muted" style="font-size:13px;text-align:center;margin-top:24px;">
+          ${authMode==='login'?'New here?':'Already have an account?'}
+          <button onclick="authMode = authMode==='login'?'signup':'login'; render();" style="text-decoration:underline;color:var(--ink);">${authMode==='login'?'Create one':'Log in'}</button>
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+function submitAuth(e){
+  e.preventDefault();
+  const name = authMode==='signup' ? document.getElementById("authName").value : "Guest";
+  const email = document.getElementById("authEmail").value;
+  state.user = { name: name || "Guest", email };
+  setView("account");
+  return false;
+}
+function viewAccount(){
+  if(!state.user) return viewAuth();
+  const u = state.user;
+  return `
+  <div class="wrap" style="max-width:640px;padding:56px 20px;">
+    <h1 class="serif" style="font-size:30px;">Hi, ${u.name}</h1>
+    <p class="muted" style="font-size:13px;margin-top:4px;">${u.email}</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:32px;">
+      <button class="card" style="padding:24px;text-align:center;" onclick="setView('orders')">📦<div class="mono" style="font-size:12px;text-transform:uppercase;margin-top:8px;">Track Orders</div></button>
+      <button class="card" style="padding:24px;text-align:center;" onclick="setView('wishlist')">♡<div class="mono" style="font-size:12px;text-transform:uppercase;margin-top:8px;">Wishlist</div></button>
+      <button class="card" style="padding:24px;text-align:center;" onclick="setView('catalog')">🛍<div class="mono" style="font-size:12px;text-transform:uppercase;margin-top:8px;">Continue Shopping</div></button>
+    </div>
+    <div class="card" style="padding:24px;margin-top:32px;">
+      <h3 class="serif" style="font-size:16px;">Profile details</h3>
+      <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:16px;">
+        <input class="field" value="${u.name}" placeholder="Full name"/>
+        <input class="field" value="${u.email}" placeholder="Email"/>
+      </div>
+      <input class="field" placeholder="Shipping address"/>
+      <button class="btn btn-dark">Save Changes</button>
+    </div>
+    <button onclick="state.user=null; setView('home');" style="font-size:12px;text-decoration:underline;color:var(--muted);margin-top:20px;">Log out</button>
+  </div>`;
+}
+function viewOrders(){
+  const statusClass = { Processing:"status-processing", Shipped:"status-shipped", Delivered:"status-delivered" };
+  return `
+  <div class="wrap" style="max-width:640px;padding:56px 20px;">
+    <h1 class="serif" style="font-size:28px;">Your Orders</h1>
+    ${state.orders.length===0 ? `<p class="muted" style="font-size:13px;margin-top:16px;">No orders yet. <button onclick="setView('catalog')" style="text-decoration:underline;">Start shopping</button></p>` :
+    `<div style="margin-top:24px;display:flex;flex-direction:column;gap:16px;">
+      ${state.orders.map(o=>`
+        <div class="card" style="padding:20px;">
+          <div class="flex between center">
+            <span class="serif" style="font-size:16px;">#${o.id}</span>
+            <span class="status-pill ${statusClass[o.status]||''}">${o.status}</span>
+          </div>
+          <p class="muted" style="font-size:12px;margin-top:4px;">${o.date} · ${o.items.length} item(s) · ${fmt(o.total)}</p>
+          <div class="progress-track">
+            ${["Processing","Shipped","Delivered"].map((s,idx)=>{
+              const reached = ["Processing","Shipped","Delivered"].indexOf(o.status) >= idx;
+              return `<div class="progress-seg ${reached?'done':''}"></div>`;
+            }).join("")}
+          </div>
+        </div>`).join("")}
+    </div>`}
+  </div>`;
+}
+
+/* --------------------------------- WISHLIST --------------------------------- */
+function toggleWish(id){
+  if(state.wishlist.includes(id)) state.wishlist = state.wishlist.filter(x=>x!==id);
+  else state.wishlist.push(id);
+  render();
+}
+function viewWishlist(){
+  const items = PRODUCTS.filter(p=>state.wishlist.includes(p.id));
+  return `
+  <div class="wrap" style="padding:48px 20px;">
+    <h1 class="serif" style="font-size:30px;">Your Wishlist</h1>
+    ${items.length===0 ? `
+    <div class="empty">♡<h2>Save products you love for later.</h2>
+      <button class="btn btn-dark" style="margin-top:20px;" onclick="setView('catalog')">Browse Products</button>
+    </div>` : `<div style="margin-top:32px;">${productGrid(items)}</div>`}
+  </div>`;
+}
+
+/* ---------------------------------- ABOUT ---------------------------------- */
+function viewAbout(){
+  return `
+  <div class="about-hero">
+    <span class="eyebrow" style="color:var(--gold);">Est. 2019</span>
+    <h1 class="serif" style="font-size:clamp(30px,4vw,44px);margin-top:12px;">Made slowly, on purpose.</h1>
+    <p>Bloomwood started in a rented kitchen with three formulas and a conviction that skincare didn't need forty ingredients to work. Every product we ship today still goes through the same small-batch process — mixed, tested, and bottled in runs of under 500.</p>
+  </div>
+  <div class="about-cols">
+    <div class="wrap">
+      <div><h3>Sourcing</h3><p>We work directly with growers and name them on every label.</p></div>
+      <div><h3>Testing</h3><p>Every formula runs an 8-week independent efficacy trial.</p></div>
+      <div><h3>Packaging</h3><p>Glass and aluminium first, recyclable everywhere else.</p></div>
+    </div>
+  </div>
+  ${spotlightHTML()}`;
+}
+
+/* ---------------------------------- BLOG ---------------------------------- */
+function viewBlog(){
+  return `
+  <div class="wrap" style="padding:56px 20px;">
+    <h1 class="serif" style="font-size:32px;">The Journal</h1>
+    <p class="muted" style="font-size:13px;margin-top:4px;">Notes on skin, formulation, and slower routines.</p>
+    <div class="grid md-grid-3" style="margin-top:32px;">
+      ${BLOG_POSTS.map(b=>`
+        <article class="blog-card">
+          <span class="blog-tag">${b.tag}</span>
+          <h3>${b.title}</h3>
+          <p>${b.excerpt}</p>
+          <span style="display:inline-block;margin-top:16px;font-size:12px;">Read more →</span>
+        </article>`).join("")}
+    </div>
+  </div>`;
+}
+
+/* ---------------------------------- ROUTER ---------------------------------- */
+const VIEWS = {
+  home: viewHome, catalog: viewCatalog, detail: viewDetail, cart: viewCart,
+  checkout: viewCheckout, orderSuccess: viewOrderSuccess, wishlist: viewWishlist,
+  account: viewAccount, orders: viewOrders, about: viewAbout, blog: viewBlog,
+};
+function setView(v){
+  state.view = v;
+  state.menuOpen = false;
+  render();
+  window.scrollTo(0,0);
+}
+function render(){
+  renderHeader();
+  document.getElementById("view").innerHTML = (VIEWS[state.view] || viewHome)();
+}
+document.getElementById("menuToggle").addEventListener("click", ()=>{ state.menuOpen = !state.menuOpen; renderHeader(); });
+
+render();
+</script>
+</body>
+</html>
