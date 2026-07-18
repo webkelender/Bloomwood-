@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shop All Products — Bloomwood</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">Bloomwood</a>
+    <nav class="mainnav">
+      <a class="navlink" href="index.html">Home</a>
+      <a class="navlink active" href="products.html">Shop</a>
+      <a class="navlink" href="admin.html">Admin Panel</a>
+    </nav>
+    <a class="btn btn-dark" href="index.html">Home</a>
+  </div>
+</header>
+
+<div class="wrap" style="padding:48px 20px;">
+  <h1 class="serif" style="font-size:34px;">Shop All Products</h1>
+  <p class="muted" style="font-size:13px;margin-top:4px;" id="resultCount"></p>
+
+  <div class="filters">
+    <div id="catPills" class="flex gap8" style="flex-wrap:wrap;"></div>
+    <div style="margin-left:auto;">
+      <select id="sortFilter">
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating">Top Rated</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="productList"></div>
+
+  <div class="flex" style="justify-content:center;margin-top:40px;" id="showMoreWrap">
+    <button class="btn btn-outline" id="showMoreBtn">Show More Items</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <p class="serif" style="font-size:20px;color:var(--ivory);">Bloomwood</p>
+      <p style="color:#9AA791;font-size:13px;margin-top:12px;line-height:1.7;">Small-batch skincare and cosmetics, formulated with restraint.</p>
+    </div>
+    <div>
+      <h4>Shop</h4>
+      <a href="products.html?cat=Cosmetics">Cosmetics</a>
+      <a href="products.html?cat=Skincare">Skincare</a>
+      <a href="products.html?cat=Haircare">Haircare</a>
+      <a href="products.html?cat=Beauty Products">Beauty Products</a>
+    </div>
+    <div>
+      <h4>Store</h4>
+      <a href="index.html">Home</a>
+      <a href="products.html">All Products</a>
+      <a href="admin.html">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Bloomwood Cosmetics. All rights reserved.</span>
+    <span>✉ hello@bloomwood.co</span>
+  </div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  let cat = params.get("cat") || "All";
+  let sort = "featured";
+  let visible = 8; // "Show More Items" reveals 8 more at a time
+
+  function renderPills(){
+    const cats = ["All", ...CATEGORIES];
+    document.getElementById("catPills").innerHTML = cats.map(c=>`
+      <button class="pill" style="background:${cat===c?'var(--ink)':'var(--card)'};color:${cat===c?'var(--ivory)':'var(--ink)'}" onclick="setCat('${c}')">${c}</button>
+    `).join("");
+  }
+  function setCat(c){ cat = c; visible = 8; update(); }
+  window.setCat = setCat;
+
+  function getFiltered(){
+    let list = cat === "All" ? PRODUCTS.slice() : PRODUCTS.filter(p=>p.cat===cat);
+    if(sort==="price-asc") list.sort((a,b)=>a.price-b.price);
+    if(sort==="price-desc") list.sort((a,b)=>b.price-a.price);
+    if(sort==="rating") list.sort((a,b)=>b.rating-a.rating);
+    return list;
+  }
+
+  function update(){
+    const all = getFiltered();
+    const shown = all.slice(0, visible);
+    document.getElementById("resultCount").textContent = shown.length + " of " + all.length + " products";
+    document.getElementById("productList").innerHTML = productGrid(shown);
+    document.getElementById("showMoreWrap").style.display = visible < all.length ? "flex" : "none";
+    renderPills();
+  }
+  document.getElementById("sortFilter").addEventListener("change", e=>{ sort = e.target.value; update(); });
+  document.getElementById("showMoreBtn").addEventListener("click", ()=>{ visible += 8; update(); });
+  update();
+</script>
+</body>
+</html>
